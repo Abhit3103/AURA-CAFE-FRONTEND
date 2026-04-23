@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Render Menu
 async function initMenu() {
     try {
-        const res = await fetch(`${API}/menu`);
+        const res = await fetch(`${API}/menu/`);
         if (!res.ok) throw new Error("Fallback to mock data");
         const data = await res.json();
         if (!Array.isArray(data) || data.length === 0) throw new Error("Empty menu, using fallback");
