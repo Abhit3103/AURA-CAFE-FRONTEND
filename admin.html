@@ -1275,6 +1275,13 @@ const App = (() => {
 document.addEventListener('DOMContentLoaded', () => {
     window.app = App;
     App.init();
+    
+    // Auto-refresh dashboard every 30 seconds
+    setInterval(() => {
+        if (App.currentView === 'dashboard') {
+            App.fetchDashboardData();
+        }
+    }, 30000);
 });
     </script>
 </body>
