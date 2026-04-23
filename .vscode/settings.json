@@ -1,0 +1,9 @@
+{
+    "python.defaultInterpreterPath": "python",
+    "python.analysis.extraPaths": [
+        "C:\\Users\\tiwar\\AppData\\Roaming\\Python\\Python313\\site-packages"
+    ],
+    "python.autoComplete.extraPaths": [
+        "C:\\Users\\tiwar\\AppData\\Roaming\\Python\\Python313\\site-packages"
+    ]
+}

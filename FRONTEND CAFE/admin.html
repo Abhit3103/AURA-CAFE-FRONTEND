@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+window.onload = function() {
+    if (localStorage.getItem("admin") !== "true") {
+        window.location.href = "adminlogin.html";
+    }
+}
+</script>
+    <title>Aura | Admin Dashboard</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Custom CSS -->
+    <style>
+/* Custom Styles that go beyond Tailwind defaults */
+
+/* Fade In Animation */
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Custom Scrollbar for Main Content */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1; /* tailwind slate-300 */
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8; /* tailwind slate-400 */
+}
+
+/* Toast Notifications */
+.toast {
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    transform: translateX(120%);
+    animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    pointer-events: auto;
+}
+
+.toast.hiding {
+    animation: slideOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideIn {
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOut {
+    to {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+}
+
+/* Hover effects for table rows */
+tbody tr {
+    transition: background-color 0.2s ease;
+}
+tbody tr:hover {
+    background-color: #f8fafc; /* tailwind slate-50 */
+}
+
+/* Modal transition helper classes */
+#menu-modal:not(.opacity-0) #menu-modal-dialog {
+    transform: scale(1);
+}
+
+/* Mobile hamburger menu */
+@media (max-width: 767px) {
+    .sidebar-mobile-toggle {
+        display: flex !important;
+    }
+    .sidebar {
+        position: fixed;
+        left: -100%;
+        top: 0;
+        transition: left 0.3s ease;
+        z-index: 50;
+    }
+    .sidebar.open {
+        left: 0;
+    }
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 40;
+    }
+    .sidebar-overlay.open {
+        display: block;
+    }
+}
+
+@media (min-width: 768px) {
+    .sidebar-mobile-toggle {
+        display: none !important;
+    }
+}
+
+/* Menu card grid */
+.menu-card {
+    transition: all 0.2s ease;
+}
+.menu-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* Quick order button pulse */
+@keyframes subtlePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+.quick-order-btn {
+    animation: subtlePulse 2s ease-in-out infinite;
+}
+    </style>
+    
+    <!-- Tailwind Config for Custom Colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6', // Teal
+                            600: '#0d9488',
+                            900: '#134e4a',
+                        },
+                        surface: '#ffffff',
+                        background: '#f8fafc', // Slate-50
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-slate-800 font-sans antialiased flex h-screen overflow-hidden">
+
+    <!-- Sidebar Overlay (mobile) -->
+    <div id="sidebar-overlay" class="sidebar-overlay" onclick="app.toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar w-64 bg-surface border-r border-slate-200 flex flex-col h-full shrink-0 z-20">
+        <div class="h-16 flex items-center px-6 border-b border-slate-200">
+            <div class="flex items-center gap-2 text-slate-900 font-bold text-2xl tracking-widest font-serif">
+                <i class="ph ph-coffee text-2xl"></i>
+                AURA<span class="text-slate-400 font-sans font-medium text-sm ml-2 tracking-normal mt-1">Admin</span>
+            </div>
+        </div>
+        
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="#" data-nav="dashboard" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:text-brand-600 hover:bg-brand-50 transition-colors font-medium active">
+                <i class="ph ph-squares-four text-xl"></i>
+                Dashboard
+            </a>
+            <a href="#" data-nav="orders" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:text-brand-600 hover:bg-brand-50 transition-colors font-medium">
+                <i class="ph ph-receipt text-xl"></i>
+                Orders
+            </a>
+            <a href="#" data-nav="menu" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:text-brand-600 hover:bg-brand-50 transition-colors font-medium">
+                <i class="ph ph-book-open text-xl"></i>
+                Menu
+            </a>
+        </nav>
+        
+        <div class="p-4 border-t border-slate-200">
+            <button class="flex items-center gap-3 px-3 py-2 w-full rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors font-medium" onclick="app.logout()">
+                <i class="ph ph-sign-out text-xl"></i>
+                Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content wrapper -->
+    <div class="flex-1 flex flex-col min-w-0 bg-background relative z-10">
+        
+        <!-- Header -->
+        <header class="h-16 bg-surface border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shrink-0">
+            <!-- Mobile hamburger -->
+            <button class="sidebar-mobile-toggle items-center justify-center w-10 h-10 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors" onclick="app.toggleSidebar()">
+                <i class="ph ph-list text-2xl"></i>
+            </button>
+            
+            <!-- Search placeholder -->
+            <div class="hidden md:flex items-center gap-2 text-slate-400 bg-slate-100 rounded-lg px-3 py-1.5 w-64 border border-transparent focus-within:border-brand-500 focus-within:bg-white transition-all">
+                <i class="ph ph-magnifying-glass"></i>
+                <input type="text" placeholder="Search..." class="bg-transparent border-none outline-none text-sm text-slate-700 w-full">
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <button class="text-slate-400 hover:text-slate-600 transition-colors relative">
+                    <i class="ph ph-bell text-xl"></i>
+                    <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                </button>
+                <div class="h-8 w-8 rounded-full bg-gradient-to-tr from-brand-500 to-brand-600 text-white flex items-center justify-center font-bold text-sm shadow-sm ring-2 ring-white">
+                    A
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Scrollable Area -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-8 relative" id="main-content">
+            
+            <!-- VIEW: DASHBOARD -->
+            <section id="view-dashboard" class="view-section fade-in">
+                <div class="flex items-center justify-between mb-6 md:mb-8">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-slate-900">Dashboard</h1>
+                        <p class="text-slate-500 text-sm mt-1">Overview of your cafe's performance.</p>
+                    </div>
+                    <button class="bg-white border border-slate-200 shadow-sm text-slate-700 px-3 md:px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors flex items-center gap-2" onclick="app.fetchDashboardData()">
+                        <i class="ph ph-arrows-clockwise"></i> <span class="hidden sm:inline">Refresh</span>
+                    </button>
+                </div>
+                
+                <!-- Metrics -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+                    <!-- Revenue -->
+                    <div class="bg-surface rounded-xl border border-slate-200 p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-slate-500 font-medium text-sm">Total Revenue</h3>
+                            <div class="w-10 h-10 rounded-full bg-brand-50 flex items-center justify-center text-brand-600">
+                                <i class="ph ph-currency-dollar text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-2xl md:text-3xl font-bold text-slate-900" id="metric-revenue">₹0.00</p>
+                        <p class="text-emerald-600 text-xs mt-2 flex items-center gap-1 font-medium">
+                            <i class="ph-bold ph-trend-up"></i>
+                            <span id="metric-revenue-trend">Live Today</span>
+                        </p>
+                    </div>
+                    
+                    <!-- Orders -->
+                    <div class="bg-surface rounded-xl border border-slate-200 p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-slate-500 font-medium text-sm">Total Orders</h3>
+                            <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                                <i class="ph ph-shopping-bag text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-2xl md:text-3xl font-bold text-slate-900" id="metric-orders">0</p>
+                        <p class="text-blue-600 text-xs mt-2 flex items-center gap-1 font-medium">
+                            <i class="ph-bold ph-trend-up"></i>
+                            <span>Live Today</span>
+                        </p>
+                    </div>
+                    
+                    <!-- Items Sold -->
+                    <div class="bg-surface rounded-xl border border-slate-200 p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-slate-500 font-medium text-sm">Items Sold</h3>
+                            <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-600">
+                                <i class="ph ph-coffee text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-2xl md:text-3xl font-bold text-slate-900" id="metric-items">0</p>
+                        <p class="text-orange-600 text-xs mt-2 flex items-center gap-1 font-medium">
+                            <i class="ph-bold ph-trend-up"></i>
+                            <span>Live Today</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Quick Order Section - New -->
+                <div class="bg-surface rounded-xl border border-slate-200 shadow-sm p-4 md:p-6 mb-6 md:mb-8">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-bold text-slate-900">Quick Order</h2>
+                        <span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">Click to place order instantly</span>
+                    </div>
+                    <div id="quick-order-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Recent Orders Preview -->
+                <div class="bg-surface rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="px-4 md:px-6 py-4 md:py-5 border-b border-slate-200 flex justify-between items-center bg-white">
+                        <h2 class="text-base md:text-lg font-bold text-slate-900">Recent Orders</h2>
+                        <button class="text-brand-600 text-sm font-medium hover:text-brand-700 hover:underline" onclick="app.navigateTo('orders')">View All</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                                    <th class="px-4 md:px-6 py-3 md:py-4 font-medium border-b border-slate-200">Order ID</th>
+                                    <th class="px-4 md:px-6 py-3 md:py-4 font-medium border-b border-slate-200 hidden sm:table-cell">Date/Time</th>
+                                    <th class="px-4 md:px-6 py-3 md:py-4 font-medium border-b border-slate-200">Amount</th>
+                                    <th class="px-4 md:px-6 py-3 md:py-4 font-medium border-b border-slate-200">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashboard-recent-orders-tbody" class="divide-y divide-slate-100 text-sm">
+                                <!-- Rendered via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: ORDERS -->
+            <section id="view-orders" class="view-section hidden fade-in">
+                <div class="flex items-center justify-between mb-6 md:mb-8">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-slate-900">Orders</h1>
+                        <p class="text-slate-500 text-sm mt-1">Manage and track all customer orders.</p>
+                    </div>
+                    <div class="flex gap-2 md:gap-3">
+                        <div class="relative hidden sm:block">
+                            <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="order-search" placeholder="Search orders..." class="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent w-48 transition-all">
+                        </div>
+                        <button class="bg-white border border-slate-200 shadow-sm text-slate-700 px-3 md:px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors flex items-center gap-2" onclick="app.fetchOrders()">
+                            <i class="ph ph-arrows-clockwise"></i> <span class="hidden sm:inline">Refresh</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-surface rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                             <thead>
+                                 <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                                     <th class="px-4 md:px-6 py-3 md:py-4 font-medium border-b border-slate-200">Order ID</th>
+                                     <th class="px-4 md:px-6 py-3 md:py-4 font-medium border-b border-slate-200 hidden md:table-cell">Customer</th>
+                                     <th class="px-4 md:px-6 py-3 md:py-4 font-medium border-b border-slate-200">Items</th>
+                                     <th class="px-4 md:px-6 py-3 md:py-4 font-medium border-b border-slate-200 hidden sm:table-cell">Qty</th>
+                                     <th class="px-4 md:px-6 py-3 md:py-4 font-medium border-b border-slate-200">Total</th>
+                                     <th class="px-4 md:px-6 py-3 md:py-4 font-medium border-b border-slate-200 hidden lg:table-cell">Address</th>
+                                     <th class="px-4 md:px-6 py-3 md:py-4 font-medium border-b border-slate-200 hidden md:table-cell">Table</th>
+                                     <th class="px-4 md:px-6 py-3 md:py-4 font-medium border-b border-slate-200">Status</th>
+                                     <th class="px-4 md:px-6 py-3 md:py-4 font-medium border-b border-slate-200">Actions</th>
+                                 </tr>
+                             </thead>
+                            <tbody id="orders-tbody" class="divide-y divide-slate-100 text-sm bg-white">
+                                <!-- Orders populated here -->
+                            </tbody>
+                        </table>
+                        <div id="orders-empty" class="hidden p-8 text-center bg-white">
+                            <i class="ph ph-receipt text-4xl text-slate-300 mb-2"></i>
+                            <p class="text-slate-500">No orders found.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: MENU -->
+            <section id="view-menu" class="view-section hidden fade-in">
+                <!-- Menu Console Header -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2"><i class="ph ph-book-open text-brand-600"></i> Menu Management</h1>
+                        <p class="text-slate-500 text-sm mt-1">Add, edit, and manage your cafe's menu items.</p>
+                    </div>
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <div class="relative flex-1 sm:flex-initial">
+                            <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="menu-search" placeholder="Search menu..." oninput="app.filterMenu(this.value)" class="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent w-full sm:w-48 transition-all">
+                        </div>
+                        <button class="bg-brand-600 text-white shadow-sm px-3 md:px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors flex items-center gap-2 whitespace-nowrap" onclick="app.openMenuModal()">
+                            <i class="ph-bold ph-plus"></i> <span class="hidden sm:inline">Add Item</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Menu Stats Bar -->
+                <div class="grid grid-cols-3 gap-3 md:gap-4 mb-6">
+                    <div class="bg-white rounded-xl border border-slate-200 p-3 md:p-4 flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 shrink-0">
+                            <i class="ph ph-hamburger text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500 font-medium">Total Items</p>
+                            <p class="text-lg font-bold text-slate-900" id="menu-stat-count">0</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl border border-slate-200 p-3 md:p-4 flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+                            <i class="ph ph-currency-inr text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500 font-medium">Avg Price</p>
+                            <p class="text-lg font-bold text-slate-900" id="menu-stat-avg">₹0</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl border border-slate-200 p-3 md:p-4 flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                            <i class="ph ph-tag text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500 font-medium">Categories</p>
+                            <p class="text-lg font-bold text-slate-900" id="menu-stat-categories">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Grid View -->
+                <div id="menu-cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-8">
+                    <!-- Menu cards populated by JS -->
+                </div>
+
+                <!-- Table View -->
+                <div class="bg-surface rounded-xl border border-slate-200 shadow-sm overflow-hidden hidden lg:block">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                                    <th class="px-6 py-4 font-medium border-b border-slate-200">Image</th>
+                                    <th class="px-6 py-4 font-medium border-b border-slate-200">Name</th>
+                                    <th class="px-6 py-4 font-medium border-b border-slate-200">Category</th>
+                                    <th class="px-6 py-4 font-medium border-b border-slate-200">Price</th>
+                                    <th class="px-6 py-4 font-medium border-b border-slate-200 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="menu-tbody" class="divide-y divide-slate-100 text-sm">
+                            </tbody>
+                        </table>
+                        <div id="menu-empty" class="hidden p-8 text-center bg-white border-t border-slate-200">
+                            <i class="ph ph-book-open text-4xl text-slate-300 mb-2"></i>
+                            <p class="text-slate-500">No menu items yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- Add/Edit Menu Modal -->
+    <div id="menu-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 scale-95 transition-transform duration-200" id="menu-modal-dialog">
+            <div class="flex items-center justify-between p-6 border-b border-slate-100">
+                <h3 class="text-lg font-bold text-slate-900" id="menu-modal-title">Add Menu Item</h3>
+                <button class="text-slate-400 hover:text-slate-600 transition-colors" onclick="app.closeMenuModal()">
+                    <i class="ph ph-x text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <form id="menu-form" onsubmit="event.preventDefault(); app.submitMenuForm();" class="space-y-4">
+                    <input type="hidden" id="menu-id">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Name</label>
+                        <input type="text" id="menu-name" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Price (₹)</label>
+                            <input type="number" step="0.01" id="menu-price" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                            <input type="text" id="menu-category" placeholder="e.g. Hot Drinks" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                        <textarea id="menu-description" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm" placeholder="Item description..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Image URL</label>
+                        <input type="url" id="menu-image" placeholder="https://..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm">
+                    </div>
+                    <div class="pt-4 flex gap-3 justify-end border-t border-slate-100 mt-6">
+                        <button type="button" class="px-4 py-2 border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors" onclick="app.closeMenuModal()">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors" id="menu-submit-btn">Save Item</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Confirmation Modal -->
+    <div id="order-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 scale-95 transition-transform duration-200">
+            <div class="flex items-center justify-between p-6 border-b border-slate-100">
+                <h3 class="text-lg font-bold text-slate-900">Quick Order</h3>
+                <button class="text-slate-400 hover:text-slate-600 transition-colors" onclick="app.closeOrderModal()">
+                    <i class="ph ph-x text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <img id="order-modal-image" src="" alt="" class="w-20 h-20 rounded-lg object-cover border border-slate-200">
+                    <div>
+                        <h4 id="order-modal-name" class="font-bold text-slate-900"></h4>
+                        <p id="order-modal-price" class="text-brand-600 font-semibold"></p>
+                    </div>
+                </div>
+                <form id="quick-order-form" onsubmit="event.preventDefault(); app.submitQuickOrder();" class="space-y-4">
+                    <input type="hidden" id="order-modal-item-id">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Quantity</label>
+                            <input type="number" id="order-quantity" value="1" min="1" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Table/Seat (Optional)</label>
+                            <input type="text" id="order-seat" placeholder="e.g. A12" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Customer Name (Optional)</label>
+                        <input type="text" id="order-customer-name" placeholder="Walk-in customer" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm">
+                    </div>
+                    <div class="pt-4 flex gap-3 justify-end border-t border-slate-100 mt-6">
+                        <button type="button" class="px-4 py-2 border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors" onclick="app.closeOrderModal()">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors flex items-center gap-2">
+                            <i class="ph-bold ph-check"></i> Place Order
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+/**
+ * Aura Admin Dashboard Application Logic
+ */
+
+const App = (() => {
+    // ---- Configuration ----
+    const API_BASE_URL = 'http://127.0.0.1:8000';
+    
+    // ---- State ----
+    let currentView = 'dashboard';
+    let orders = [];
+    let menu = [];
+    let sidebarOpen = false;
+
+    // ---- DOM Elements ----
+    const els = {
+        navItems: document.querySelectorAll('.nav-item'),
+        views: document.querySelectorAll('.view-section'),
+        sidebar: document.getElementById('sidebar'),
+        sidebarOverlay: document.getElementById('sidebar-overlay'),
+        
+        // Dashboard
+        metricRevenue: document.getElementById('metric-revenue'),
+        metricOrders: document.getElementById('metric-orders'),
+        metricItems: document.getElementById('metric-items'),
+        dashboardRecentOrdersTbody: document.getElementById('dashboard-recent-orders-tbody'),
+        quickOrderGrid: document.getElementById('quick-order-grid'),
+        
+        // Orders
+        ordersTbody: document.getElementById('orders-tbody'),
+        ordersEmpty: document.getElementById('orders-empty'),
+        orderSearch: document.getElementById('order-search'),
+        
+        // Menu
+        menuTbody: document.getElementById('menu-tbody'),
+        menuEmpty: document.getElementById('menu-empty'),
+        menuCardsContainer: document.getElementById('menu-cards-container'),
+        menuModal: document.getElementById('menu-modal'),
+        menuForm: document.getElementById('menu-form'),
+        menuIdInput: document.getElementById('menu-id'),
+        menuNameInput: document.getElementById('menu-name'),
+        menuPriceInput: document.getElementById('menu-price'),
+        menuCategoryInput: document.getElementById('menu-category'),
+        menuDescriptionInput: document.getElementById('menu-description'),
+        menuImageInput: document.getElementById('menu-image'),
+        menuModalTitle: document.getElementById('menu-modal-title'),
+        menuSubmitBtn: document.getElementById('menu-submit-btn'),
+        
+        // Order Modal
+        orderModal: document.getElementById('order-modal'),
+        orderModalImage: document.getElementById('order-modal-image'),
+        orderModalName: document.getElementById('order-modal-name'),
+        orderModalPrice: document.getElementById('order-modal-price'),
+        orderModalItemId: document.getElementById('order-modal-item-id'),
+        orderQuantity: document.getElementById('order-quantity'),
+        orderSeat: document.getElementById('order-seat'),
+        orderCustomerName: document.getElementById('order-customer-name'),
+        
+        // Toast
+        toastContainer: document.getElementById('toast-container')
+    };
+
+    // ---- Initialization ----
+    const init = () => {
+        bindEvents();
+        navigateTo('dashboard');
+    };
+
+    const bindEvents = () => {
+        // Navigation
+        els.navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const view = e.currentTarget.getAttribute('data-nav');
+                navigateTo(view);
+                // Close sidebar on mobile after navigation
+                if (window.innerWidth < 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+
+        // Search Orders
+        if (els.orderSearch) {
+            els.orderSearch.addEventListener('input', (e) => {
+                renderOrders(e.target.value);
+            });
+        }
+
+        // Close modals on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeMenuModal();
+                closeOrderModal();
+            }
+        });
+    };
+
+    // ---- Sidebar Toggle ----
+    const toggleSidebar = () => {
+        sidebarOpen = !sidebarOpen;
+        els.sidebar.classList.toggle('open', sidebarOpen);
+        els.sidebarOverlay.classList.toggle('open', sidebarOpen);
+    };
+
+    // ---- Navigation ----
+    const navigateTo = (viewName) => {
+        currentView = viewName;
+        
+        // Update nav styling
+        els.navItems.forEach(item => {
+            if (item.getAttribute('data-nav') === viewName) {
+                item.classList.add('text-brand-600', 'bg-brand-50');
+                item.classList.remove('text-slate-600');
+            } else {
+                item.classList.remove('text-brand-600', 'bg-brand-50');
+                item.classList.add('text-slate-600');
+            }
+        });
+
+        // Update views
+        els.views.forEach(view => {
+            if (view.id === `view-${viewName}`) {
+                view.classList.remove('hidden');
+            } else {
+                view.classList.add('hidden');
+            }
+        });
+
+        // Load data depending on view
+        if (viewName === 'dashboard') {
+            fetchDashboardData();
+        } else if (viewName === 'orders') {
+            fetchOrders();
+        } else if (viewName === 'menu') {
+            fetchMenu();
+        }
+    };
+
+    // ---- API Wrapper ----
+    const apiCall = async (endpoint, method = 'GET', body = null) => {
+        try {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status} ${response.statusText}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('API Call Failed:', error);
+            showToast(error.message, 'error');
+            return null;
+        }
+    };
+
+    // ---- Toast Notifications ----
+    const showToast = (message, type = 'success') => {
+        const toast = document.createElement('div');
+        toast.className = `toast flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg border text-sm font-medium w-80 bg-white ${
+            type === 'success' ? 'border-brand-200 text-slate-800' : 'border-red-200 text-slate-800'
+        }`;
+        
+        const icon = type === 'success' 
+            ? '<div class="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 shrink-0"><i class="ph-bold ph-check text-lg"></i></div>'
+            : '<div class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-600 shrink-0"><i class="ph-bold ph-warning text-lg"></i></div>';
+            
+        toast.innerHTML = `
+            ${icon}
+            <div class="flex-1">${message}</div>
+            <button class="text-slate-400 hover:text-slate-600" onclick="this.parentElement.remove()">
+                <i class="ph ph-x"></i>
+            </button>
+        `;
+        
+        els.toastContainer.appendChild(toast);
+        
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.classList.add('hiding');
+                toast.addEventListener('animationend', () => toast.remove());
+            }
+        }, 4000);
+    };
+
+    // ---- Dashboard Logic ----
+    const fetchDashboardData = async () => {
+        const fetchedOrders = await apiCall('/orders');
+        if (fetchedOrders) {
+            orders = fetchedOrders.sort((a,b) => new Date(b.created_at || b.date) - new Date(a.created_at || a.date));
+            
+            // Calculate metrics
+            let totalRevenue = 0;
+            let totalItemsSold = 0;
+            
+            orders.forEach(o => {
+                const total = o.total_price || o.total || 0;
+                totalRevenue += parseFloat(total);
+                
+                if (Array.isArray(o.items)) {
+                    totalItemsSold += o.items.reduce((acc, item) => acc + (item.quantity || 1), 0);
+                }
+            });
+
+            els.metricRevenue.textContent = `₹${totalRevenue.toFixed(2)}`;
+            els.metricOrders.textContent = orders.length;
+            els.metricItems.textContent = totalItemsSold;
+
+            renderRecentOrders(orders.slice(0, 5));
+        }
+
+        // Fetch menu for quick order section
+        const menuData = await apiCall('/menu');
+        if (menuData) {
+            menu = Array.isArray(menuData) ? menuData : (menuData.items || []);
+            renderQuickOrderGrid(menu);
+        }
+    };
+
+    const renderRecentOrders = (recentOrders) => {
+        els.dashboardRecentOrdersTbody.innerHTML = '';
+        if (recentOrders.length === 0) {
+            els.dashboardRecentOrdersTbody.innerHTML = `<tr><td colspan="4" class="px-4 md:px-6 py-4 text-center text-slate-500">No recent orders</td></tr>`;
+            return;
+        }
+
+        recentOrders.forEach(o => {
+            const tr = document.createElement('tr');
+            const total = o.total_price || o.total || 0;
+            const dateStr = o.created_at || o.date || new Date().toISOString();
+            
+            tr.innerHTML = `
+                <td class="px-4 md:px-6 py-4 font-medium text-slate-900">#${o.id || o.order_id || '---'}</td>
+                <td class="px-4 md:px-6 py-4 text-slate-600 hidden sm:table-cell">${new Date(dateStr).toLocaleString()}</td>
+                <td class="px-4 md:px-6 py-4 text-slate-900">₹${parseFloat(total).toFixed(2)}</td>
+                <td class="px-4 md:px-6 py-4">${getStatusBadge(o.status)}</td>
+            `;
+            els.dashboardRecentOrdersTbody.appendChild(tr);
+        });
+    };
+
+    const renderQuickOrderGrid = (menuItems) => {
+        els.quickOrderGrid.innerHTML = '';
+        if (menuItems.length === 0) {
+            els.quickOrderGrid.innerHTML = '<p class="text-slate-500 text-sm col-span-full text-center py-4">No menu items available</p>';
+            return;
+        }
+
+        menuItems.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'menu-card bg-white rounded-lg border border-slate-200 p-3 cursor-pointer hover:border-brand-400 transition-colors';
+            const img = item.image || item.image_url || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=150';
+            
+            card.innerHTML = `
+                <div class="aspect-square rounded-md overflow-hidden mb-2 bg-slate-100">
+                    <img src="${img}" alt="${item.name}" class="w-full h-full object-cover">
+                </div>
+                <h4 class="font-medium text-slate-900 text-sm truncate">${item.name}</h4>
+                <p class="text-brand-600 font-semibold text-sm">₹${parseFloat(item.price || 0).toFixed(2)}</p>
+                <button class="quick-order-btn w-full mt-2 bg-brand-600 text-white text-xs py-1.5 rounded hover:bg-brand-700 transition-colors flex items-center justify-center gap-1" onclick="app.openOrderModal(${item.id})">
+                    <i class="ph-bold ph-plus"></i> Order
+                </button>
+            `;
+            els.quickOrderGrid.appendChild(card);
+        });
+    };
+
+    const getStatusBadge = (status) => {
+        const s = (status || 'pending').toLowerCase();
+        if (s === 'completed' || s === 'ready') {
+            return `<span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200 uppercase tracking-wide flex w-max items-center gap-1.5"><i class="ph-bold ph-check-circle text-sm"></i>${status}</span>`;
+        } else if (s === 'preparing') {
+            return `<span class="px-2.5 py-1 rounded-full bg-orange-50 text-orange-700 text-xs font-semibold border border-orange-200 uppercase tracking-wide flex w-max items-center gap-1.5"><i class="ph-bold ph-cooking-pot text-sm animate-pulse"></i>${status}</span>`;
+        } else if (s === 'pending') {
+            return `<span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold border border-amber-200 uppercase tracking-wide flex w-max items-center gap-1.5"><i class="ph-bold ph-clock text-sm"></i>${status}</span>`;
+        } else if (s === 'cancelled' || s === 'rejected') {
+            return `<span class="px-2.5 py-1 rounded-full bg-red-50 text-red-700 text-xs font-semibold border border-red-200 uppercase tracking-wide flex w-max items-center gap-1.5"><i class="ph-bold ph-x-circle text-sm"></i>${status}</span>`;
+        } else if (s === 'delivered') {
+            return `<span class="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200 uppercase tracking-wide flex w-max items-center gap-1.5"><i class="ph-bold ph-package text-sm"></i>${status}</span>`;
+        }
+        return `<span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 uppercase tracking-wide flex w-max items-center gap-1.5"><i class="ph-bold ph-question text-sm"></i>${status || 'Unknown'}</span>`;
+    };
+
+    // ---- Orders Logic ----
+    const fetchOrders = async () => {
+        const data = await apiCall('/orders');
+        if (data) {
+            orders = data.sort((a,b) => new Date(b.created_at || b.date) - new Date(a.created_at || a.date));
+            renderOrders();
+        }
+    };
+
+    const renderOrders = (filterText = '') => {
+        els.ordersTbody.innerHTML = '';
+        
+        let filtered = orders;
+        if (filterText.trim() !== '') {
+            const ft = filterText.toLowerCase();
+            filtered = orders.filter(o => {
+                const idStr = String(o.id || o.order_id || '');
+                const statusStr = String(o.status || '').toLowerCase();
+                return idStr.includes(ft) || statusStr.includes(ft);
+            });
+        }
+
+        if (filtered.length === 0) {
+            els.ordersTbody.parentElement.classList.add('hidden');
+            els.ordersEmpty.classList.remove('hidden');
+            return;
+        }
+
+        els.ordersTbody.parentElement.classList.remove('hidden');
+        els.ordersEmpty.classList.add('hidden');
+
+        filtered.forEach(o => {
+            const tr = document.createElement('tr');
+            
+            let itemsText = 'N/A';
+            let qty = 0;
+            if (Array.isArray(o.items)) {
+                itemsText = o.items.map(i => i.name || i.menu_item_id || 'Item').join(', ');
+                if (itemsText.length > 30) itemsText = itemsText.substring(0, 30) + '...';
+                qty = o.items.reduce((acc, i) => acc + (i.quantity || 1), 0);
+            } else if (o.items) {
+                itemsText = typeof o.items === 'string' ? o.items : JSON.stringify(o.items);
+            }
+
+            const total = o.total_price || o.total || 0;
+            const dateStr = o.created_at || o.date || new Date().toISOString();
+
+            tr.innerHTML = `
+                <td class="px-4 md:px-6 py-4 font-medium text-slate-900 border-b border-slate-100">#${o.id || o.order_id || '---'}</td>
+                <td class="px-4 md:px-6 py-4 text-slate-600 border-b border-slate-100 hidden md:table-cell">${o.customer_name || 'N/A'}</td>
+                <td class="px-4 md:px-6 py-4 text-slate-600 border-b border-slate-100">${itemsText}</td>
+                <td class="px-4 md:px-6 py-4 text-slate-600 border-b border-slate-100 hidden sm:table-cell">${qty}</td>
+                <td class="px-4 md:px-6 py-4 font-medium text-slate-900 border-b border-slate-100">₹${parseFloat(total).toFixed(2)}</td>
+                <td class="px-4 md:px-6 py-4 text-slate-600 border-b border-slate-100 hidden lg:table-cell">${o.address || 'N/A'}</td>
+                <td class="px-4 md:px-6 py-4 text-slate-600 border-b border-slate-100 hidden md:table-cell">${o.seat_number || 'N/A'}</td>
+                <td class="px-4 md:px-6 py-4 border-b border-slate-100">${getStatusBadge(o.status)}</td>
+                <td class="px-4 md:px-6 py-4 border-b border-slate-100">
+                    <select onchange="app.updateOrderStatus(${o.id}, this.value)" class="text-xs border border-slate-200 rounded px-2 py-1 bg-white">
+                        <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Pending</option>
+                        <option value="preparing" ${o.status === 'preparing' ? 'selected' : ''}>Preparing</option>
+                        <option value="completed" ${o.status === 'completed' ? 'selected' : ''}>Completed</option>
+                    </select>
+                </td>
+            `;
+            els.ordersTbody.appendChild(tr);
+        });
+    };
+
+    const updateOrderStatus = async (orderId, newStatus) => {
+        // Assuming there's an endpoint to update order status
+        // For now, we'll just show a toast
+        showToast(`Order #${orderId} marked as ${newStatus}`);
+        fetchOrders(); // Refresh
+    };
+
+    // ---- Menu Logic ----
+    const fetchMenu = async () => {
+        const data = await apiCall('/menu');
+        if (data) {
+            menu = Array.isArray(data) ? data : (data.items || []);
+            renderMenuCards();
+            renderMenuTable();
+            updateMenuStats();
+        }
+    };
+
+    const updateMenuStats = () => {
+        const countEl = document.getElementById('menu-stat-count');
+        const avgEl = document.getElementById('menu-stat-avg');
+        const catEl = document.getElementById('menu-stat-categories');
+        if (countEl) countEl.textContent = menu.length;
+        if (avgEl) {
+            const avg = menu.length > 0 ? menu.reduce((s, i) => s + parseFloat(i.price || 0), 0) / menu.length : 0;
+            avgEl.textContent = `₹${avg.toFixed(0)}`;
+        }
+        if (catEl) {
+            const cats = new Set(menu.map(i => (i.category || 'Uncategorized').toLowerCase()));
+            catEl.textContent = cats.size;
+        }
+    };
+
+    const filterMenu = (query) => {
+        const q = query.toLowerCase().trim();
+        const cards = els.menuCardsContainer.querySelectorAll('.menu-card');
+        cards.forEach(card => {
+            const name = card.querySelector('h3')?.textContent?.toLowerCase() || '';
+            const cat = card.querySelector('span')?.textContent?.toLowerCase() || '';
+            card.style.display = (name.includes(q) || cat.includes(q)) ? '' : 'none';
+        });
+    };
+
+    const renderMenuCards = () => {
+        els.menuCardsContainer.innerHTML = '';
+        if (menu.length === 0) {
+            els.menuCardsContainer.innerHTML = `
+                <div class="col-span-full p-8 text-center bg-surface rounded-xl border border-slate-200">
+                    <i class="ph ph-book-open text-4xl text-slate-300 mb-2"></i>
+                    <p class="text-slate-500">No menu items yet. Click "Add Item" to get started.</p>
+                </div>
+            `;
+            return;
+        }
+
+        menu.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'menu-card bg-surface rounded-xl border border-slate-200 overflow-hidden shadow-sm';
+            card.id = `menu-card-${item.id}`;
+            const img = item.image || item.image_url || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=300';
+            
+            card.innerHTML = `
+                <!-- Display Mode -->
+                <div class="card-display" data-id="${item.id}">
+                    <div class="h-40 overflow-hidden bg-slate-100">
+                        <img src="${img}" alt="${item.name}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-start justify-between mb-2">
+                            <h3 class="font-bold text-slate-900 line-clamp-1">${item.name}</h3>
+                            <span class="font-medium text-slate-900 whitespace-nowrap ml-2">₹${parseFloat(item.price || 0).toFixed(2)}</span>
+                        </div>
+                        <span class="inline-block px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs font-medium border border-slate-200 mb-2">${item.category || 'Uncategorized'}</span>
+                        <p class="text-slate-500 text-sm line-clamp-2 mb-3">${item.description || 'No description available.'}</p>
+                        <div class="flex gap-2">
+                            <button class="flex-1 bg-brand-600 text-white text-sm py-2 rounded-lg hover:bg-brand-700 transition-colors flex items-center justify-center gap-1" onclick="app.openOrderModal(${item.id})">
+                                <i class="ph-bold ph-plus"></i> Quick Order
+                            </button>
+                            <button class="w-9 h-9 rounded-lg border border-slate-200 text-slate-400 hover:text-brand-600 hover:border-brand-300 transition-colors flex items-center justify-center" title="Edit inline" onclick="app.inlineEdit(${item.id})">
+                                <i class="ph ph-pencil-simple"></i>
+                            </button>
+                            <button class="w-9 h-9 rounded-lg border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-300 transition-colors flex items-center justify-center" onclick="app.deleteMenuItem(${item.id})">
+                                <i class="ph ph-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Inline Edit Mode (hidden by default) -->
+                <div class="card-edit hidden" data-id="${item.id}">
+                    <div class="p-4 space-y-3">
+                        <div class="flex items-center gap-2 mb-1">
+                            <i class="ph ph-pencil-line text-brand-600"></i>
+                            <span class="text-sm font-bold text-slate-900">Editing: ${item.name}</span>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">Name</label>
+                            <input type="text" class="ie-name w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" value="${(item.name || '').replace(/"/g, '&quot;')}">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 mb-1">Price (₹)</label>
+                                <input type="number" step="0.01" class="ie-price w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" value="${item.price || 0}">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 mb-1">Category</label>
+                                <input type="text" class="ie-category w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" value="${(item.category || '').replace(/"/g, '&quot;')}">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">Description</label>
+                            <textarea class="ie-desc w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" rows="2">${item.description || ''}</textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">Image URL</label>
+                            <input type="url" class="ie-image w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" value="${(item.image || item.image_url || '').replace(/"/g, '&quot;')}">
+                        </div>
+                        <div class="flex gap-2 pt-2 border-t border-slate-100">
+                            <button class="flex-1 bg-brand-600 text-white text-sm py-2 rounded-lg hover:bg-brand-700 transition-colors flex items-center justify-center gap-1" onclick="app.saveInlineEdit(${item.id})">
+                                <i class="ph-bold ph-check"></i> Save
+                            </button>
+                            <button class="flex-1 border border-slate-200 text-slate-700 text-sm py-2 rounded-lg hover:bg-slate-50 transition-colors" onclick="app.cancelInlineEdit(${item.id})">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            els.menuCardsContainer.appendChild(card);
+        });
+    };
+
+    const renderMenuTable = () => {
+        els.menuTbody.innerHTML = '';
+        if (menu.length === 0) {
+            els.menuTbody.parentElement.classList.add('hidden');
+            els.menuEmpty.classList.remove('hidden');
+            return;
+        }
+
+        els.menuTbody.parentElement.classList.remove('hidden');
+        els.menuEmpty.classList.add('hidden');
+
+        menu.forEach(item => {
+            const tr = document.createElement('tr');
+            const img = item.image || item.image_url || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=150';
+            
+            tr.innerHTML = `
+                <td class="px-6 py-4 border-b border-slate-100">
+                    <img src="${img}" alt="${item.name}" class="w-12 h-12 rounded-lg object-cover border border-slate-200">
+                </td>
+                <td class="px-6 py-4 font-medium text-slate-900 border-b border-slate-100">${item.name || 'Unnamed'}</td>
+                <td class="px-6 py-4 text-slate-600 border-b border-slate-100">
+                    <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-medium border border-slate-200">${item.category || 'Uncategorized'}</span>
+                </td>
+                <td class="px-6 py-4 font-medium text-slate-900 border-b border-slate-100">₹${parseFloat(item.price || 0).toFixed(2)}</td>
+                <td class="px-6 py-4 border-b border-slate-100 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                        <button class="w-8 h-8 rounded text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-colors flex items-center justify-center" onclick="app.editMenuItem(${item.id})">
+                            <i class="ph ph-pencil-simple text-lg"></i>
+                        </button>
+                        <button class="w-8 h-8 rounded text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors flex items-center justify-center" onclick="app.deleteMenuItem(${item.id})">
+                            <i class="ph ph-trash text-lg"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            els.menuTbody.appendChild(tr);
+        });
+    };
+
+    // ---- Menu Modal Logic ----
+    const openMenuModal = (itemId = null) => {
+        els.menuForm.reset();
+        els.menuIdInput.value = '';
+        els.menuModalTitle.textContent = 'Add Menu Item';
+        els.menuSubmitBtn.textContent = 'Add Item';
+
+        if (itemId !== null) {
+            const item = menu.find(i => String(i.id) === String(itemId));
+            if (item) {
+                els.menuIdInput.value = item.id;
+                els.menuNameInput.value = item.name || '';
+                els.menuPriceInput.value = item.price || '';
+                els.menuCategoryInput.value = item.category || '';
+                els.menuDescriptionInput.value = item.description || '';
+                els.menuImageInput.value = item.image || item.image_url || '';
+                els.menuModalTitle.textContent = 'Edit Menu Item';
+                els.menuSubmitBtn.textContent = 'Save Changes';
+            }
+        }
+
+        els.menuModal.classList.remove('opacity-0', 'pointer-events-none');
+    };
+
+    const closeMenuModal = () => {
+        els.menuModal.classList.add('opacity-0', 'pointer-events-none');
+    };
+
+    const submitMenuForm = async () => {
+        const id = els.menuIdInput.value;
+        const payload = {
+            name: els.menuNameInput.value,
+            price: parseFloat(els.menuPriceInput.value),
+            category: els.menuCategoryInput.value,
+            description: els.menuDescriptionInput.value,
+        };
+        const img = els.menuImageInput.value;
+        if(img) payload.image = img;
+
+        if (id) {
+            // Edit
+            const res = await apiCall(`/menu/${id}`, 'PUT', payload);
+            if (res !== null) {
+                showToast('Menu item updated');
+                closeMenuModal();
+                fetchMenu();
+            }
+        } else {
+            // Add
+            const res = await apiCall('/menu', 'POST', payload);
+            if (res !== null) {
+                showToast('Menu item added successfully');
+                closeMenuModal();
+                fetchMenu();
+            }
+        }
+    };
+
+    const deleteMenuItem = async (id) => {
+        if (!confirm('Are you sure you want to delete this menu item?')) return;
+        
+        const res = await apiCall(`/menu/${id}`, 'DELETE');
+        if (res !== null) {
+            showToast('Item deleted successfully', 'success');
+            fetchMenu();
+        }
+    };
+
+    // ---- Quick Order Modal Logic ----
+    const openOrderModal = (itemId) => {
+        const item = menu.find(i => String(i.id) === String(itemId));
+        if (!item) return;
+
+        const img = item.image || item.image_url || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=150';
+        
+        els.orderModalImage.src = img;
+        els.orderModalName.textContent = item.name;
+        els.orderModalPrice.textContent = `₹${parseFloat(item.price || 0).toFixed(2)}`;
+        els.orderModalItemId.value = item.id;
+        els.orderQuantity.value = 1;
+        els.orderSeat.value = '';
+        els.orderCustomerName.value = '';
+
+        els.orderModal.classList.remove('opacity-0', 'pointer-events-none');
+    };
+
+    const closeOrderModal = () => {
+        els.orderModal.classList.add('opacity-0', 'pointer-events-none');
+    };
+
+    const submitQuickOrder = async () => {
+        const itemId = els.orderModalItemId.value;
+        const quantity = parseInt(els.orderQuantity.value);
+        const seatNumber = els.orderSeat.value;
+        const customerName = els.orderCustomerName.value;
+
+        const payload = {
+            customer_name: customerName || 'Walk-in Customer',
+            seat_number: seatNumber || null,
+            items: [
+                { item_id: parseInt(itemId), quantity: quantity }
+            ]
+        };
+
+        const res = await apiCall('/orders', 'POST', payload);
+        if (res !== null) {
+            showToast(`Order placed successfully! Order #${res.id || 'N/A'}`);
+            closeOrderModal();
+            if (currentView === 'dashboard') {
+                fetchDashboardData();
+            } else if (currentView === 'orders') {
+                fetchOrders();
+            }
+        }
+    };
+
+    const logout = () => {
+        localStorage.removeItem("admin");
+        window.location.href = "adminlogin.html";
+    };
+
+    // ---- Inline Edit Helpers ----
+    const inlineEdit = (id) => {
+        const card = document.getElementById(`menu-card-${id}`);
+        if (!card) return;
+        card.querySelector('.card-display').classList.add('hidden');
+        card.querySelector('.card-edit').classList.remove('hidden');
+        card.classList.add('ring-2', 'ring-brand-500');
+    };
+
+    const cancelInlineEdit = (id) => {
+        const card = document.getElementById(`menu-card-${id}`);
+        if (!card) return;
+        card.querySelector('.card-display').classList.remove('hidden');
+        card.querySelector('.card-edit').classList.add('hidden');
+        card.classList.remove('ring-2', 'ring-brand-500');
+    };
+
+    const saveInlineEdit = async (id) => {
+        const card = document.getElementById(`menu-card-${id}`);
+        if (!card) return;
+        const editDiv = card.querySelector('.card-edit');
+        const payload = {
+            name: editDiv.querySelector('.ie-name').value,
+            price: parseFloat(editDiv.querySelector('.ie-price').value),
+            category: editDiv.querySelector('.ie-category').value,
+            description: editDiv.querySelector('.ie-desc').value,
+        };
+        const img = editDiv.querySelector('.ie-image').value;
+        if (img) payload.image = img;
+
+        const res = await apiCall(`/menu/${id}`, 'PUT', payload);
+        if (res !== null) {
+            showToast('Menu item updated!');
+            fetchMenu();
+        }
+    };
+
+    // ---- Public Interface ----
+    return {
+        init,
+        navigateTo,
+        toggleSidebar,
+        fetchDashboardData,
+        fetchOrders,
+        fetchMenu,
+        filterMenu,
+        openMenuModal,
+        closeMenuModal,
+        submitMenuForm,
+        editMenuItem: openMenuModal,
+        deleteMenuItem,
+        inlineEdit,
+        cancelInlineEdit,
+        saveInlineEdit,
+        openOrderModal,
+        closeOrderModal,
+        submitQuickOrder,
+        updateOrderStatus,
+        logout
+    };
+})();
+
+// Boot App
+document.addEventListener('DOMContentLoaded', () => {
+    window.app = App;
+    App.init();
+});
+    </script>
+</body>
+</html>
