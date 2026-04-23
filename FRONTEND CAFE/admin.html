@@ -565,7 +565,7 @@ tbody tr:hover {
 
 const App = (() => {
     // ---- Configuration ----
-    const API_BASE_URL = 'https://aura-cafe-full-stack-webapp-production.up.railway.app/api';
+    const API_BASE_URL = 'https://aura-cafe-full-stack-webapp-production.up.railway.app';
     
     // ---- State ----
     let currentView = 'dashboard';
@@ -779,7 +779,7 @@ const App = (() => {
         }
 
         // Fetch menu for quick order section
-        const menuData = await apiCall('/menu');
+        const menuData = await apiCall('/menu/');
         if (menuData) {
             menu = Array.isArray(menuData) ? menuData : (menuData.items || []);
             renderQuickOrderGrid(menu);
@@ -927,7 +927,7 @@ const App = (() => {
 
     // ---- Menu Logic ----
     const fetchMenu = async () => {
-        const data = await apiCall('/menu');
+        const data = await apiCall('/menu/');
         if (data) {
             menu = Array.isArray(data) ? data : (data.items || []);
             renderMenuCards();
@@ -1137,7 +1137,7 @@ const App = (() => {
             }
         } else {
             // Add
-            const res = await apiCall('/menu', 'POST', payload);
+            const res = await apiCall('/menu/', 'POST', payload);
             if (res !== null) {
                 showToast('Menu item added successfully');
                 closeMenuModal();
