@@ -1,4 +1,4 @@
-const API = "http://127.0.0.1:8000";
+const API = "https://aura-cafe-full-stack-webapp-production.up.railway.app";
 
 // App State
 let menuItems = [];

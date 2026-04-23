@@ -1,9 +1,13 @@
 /**
  * ============================================================
- * AURA CAFE — AI Chatbot Widget  (chatbot.js)
+ * AURA CAFE — Cafe Assistant Chatbot Widget  (chatbot.js)
  * ============================================================
- * Connects to FastAPI endpoint: POST /api/chat
- * Fallback: smart local keyword matching when backend is down
+ * A local, rule-based chatbot that helps customers with:
+ *  - Menu information
+ *  - Combo suggestions
+ *  - Order tracking info
+ *  - Recommendations
+ *  - General cafe queries
  *
  * Features:
  *  - Floating toggle button with smooth open/close animation
@@ -13,7 +17,7 @@
  *  - Enter-key to send
  *  - Timestamps on every message
  *  - Disable input/send while waiting for response
- *  - Context-aware local fallback replies (menu, combos, order)
+ *  - Context-aware keyword-based replies (menu, combos, order)
  *  - Mobile responsive
  * ============================================================
  */
@@ -21,12 +25,6 @@
 /* ──────────────────────────────────────────────────────────
    CONFIG
 ────────────────────────────────────────────────────────── */
-
-/** Base URL for your FastAPI backend. Change this if deployed. */
-const CHATBOT_API_BASE = "http://127.0.0.1:8000";
-
-/** Full endpoint for the chatbot */
-const CHATBOT_ENDPOINT = `${CHATBOT_API_BASE}/api/chat`;
 
 /**
  * Minimum time (ms) to show the typing indicator.
@@ -284,8 +282,8 @@ class AuraChatbot {
     /* Show typing indicator */
     this._showTyping();
 
-    /* Fetch bot reply */
-    const reply = await this._fetchBotReply(text);
+    /* Generate local cafe-based response */
+    const reply = await this._generateCafeResponse(text);
 
     /* Hide typing indicator, show reply */
     this._hideTyping();
@@ -304,59 +302,20 @@ class AuraChatbot {
   }
 
   /* ──────────────────────────────────
-     API CALL  →  FastAPI /api/chat
+     CAFE RESPONSE ENGINE
   ────────────────────────────────── */
 
   /**
-   * Sends message to FastAPI, falls back to local engine on error.
+   * Generates a cafe-based response using local keyword matching.
    * @param {string} userMessage
    * @returns {Promise<string>} bot reply text
    */
-  async _fetchBotReply(userMessage) {
-    /* We wait at least TYPING_DELAY_MS for a more natural feel */
-    const [apiResult] = await Promise.allSettled([
-      this._callAPI(userMessage),
-      new Promise(resolve => setTimeout(resolve, TYPING_DELAY_MS)),
-    ]);
-
-    if (apiResult.status === "fulfilled" && apiResult.value) {
-      return apiResult.value;
-    }
-
-    /* API failed / not running — use smart local fallback */
-    console.warn("[AuraChatbot] Backend unreachable. Using local fallback.");
+  async _generateCafeResponse(userMessage) {
+    /* Wait for typing delay to make it feel natural */
+    await new Promise(resolve => setTimeout(resolve, TYPING_DELAY_MS));
+    
+    /* Use the local fallback response engine */
     return localFallbackResponse(userMessage);
-  }
-
-  /**
-   * Makes the actual POST request to the FastAPI endpoint.
-   * @param {string} message
-   * @returns {Promise<string|null>}
-   */
-  async _callAPI(message) {
-    try {
-      const res = await fetch(CHATBOT_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
-        signal: AbortSignal.timeout(8000), // 8s timeout
-      });
-
-      if (!res.ok) {
-        console.error(`[AuraChatbot] API error: ${res.status} ${res.statusText}`);
-        return null;
-      }
-
-      const data = await res.json();
-
-      /* Support both { reply: "..." } and { message: "..." } shapes */
-      return data.reply || data.message || null;
-    } catch (err) {
-      if (err.name !== "AbortError") {
-        console.error("[AuraChatbot] Fetch failed:", err);
-      }
-      return null;
-    }
   }
 
   /* ──────────────────────────────────
