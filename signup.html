@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | Aura Cafe</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cafe: {
+                            100: '#F5F5F0', // Cream
+                            200: '#E8E4D9', // Beige
+                            400: '#A39171', // Soft Gold/Brown
+                            800: '#4A3B32', // Deep Brown
+                            900: '#1C1917', // Soft Black
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-cafe-100 text-cafe-900 font-sans antialiased min-h-screen flex items-center justify-center relative py-12 px-4 overflow-y-auto">
+    
+    <!-- Background Image -->
+    <div class="fixed inset-0 z-0">
+        <img src="https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&q=80&w=2000" alt="Coffee Background" class="w-full h-full object-cover blur-[6px] scale-105 opacity-40">
+        <div class="absolute inset-0 bg-cafe-100/70"></div>
+    </div>
+
+    <!-- Signup Card -->
+    <div class="glass-card w-full max-w-lg p-8 md:p-10 rounded-3xl z-10 fade-in">
+        <div class="text-center mb-8">
+            <a href="index.html" class="flex justify-center items-center gap-2 text-2xl font-serif font-semibold tracking-wider text-cafe-800 mb-2 hover:opacity-80 transition-opacity">
+                <i data-lucide="coffee" class="w-6 h-6"></i>
+                AURA
+            </a>
+            <p class="text-cafe-900/60 font-medium">Create your account to start ordering.</p>
+        </div>
+
+        <form id="signupForm" class="space-y-4">
+            <div>
+                <label for="name" class="block text-sm font-medium text-cafe-800 mb-1.5">Full Name</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i data-lucide="user" class="w-4 h-4 text-cafe-400"></i>
+                    </div>
+                    <input type="text" id="name" required placeholder="John Doe" autofocus
+                        class="w-full pl-11 pr-4 py-3 bg-white/50 border border-cafe-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cafe-400 focus:bg-white transition-all text-cafe-900 placeholder-cafe-900/40">
+                </div>
+            </div>
+
+            <div>
+                <label for="email" class="block text-sm font-medium text-cafe-800 mb-1.5">Email Address</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i data-lucide="mail" class="w-4 h-4 text-cafe-400"></i>
+                    </div>
+                    <input type="email" id="email" required placeholder="hello@example.com"
+                        class="w-full pl-11 pr-4 py-3 bg-white/50 border border-cafe-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cafe-400 focus:bg-white transition-all text-cafe-900 placeholder-cafe-900/40">
+                </div>
+            </div>
+
+            <div>
+                <label for="phone" class="block text-sm font-medium text-cafe-800 mb-1.5">Phone Number</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i data-lucide="phone" class="w-4 h-4 text-cafe-400"></i>
+                    </div>
+                    <input type="tel" id="phone" required placeholder="(123) 456-7890" pattern="[0-9\-\(\)\s]+" 
+                        class="w-full pl-11 pr-4 py-3 bg-white/50 border border-cafe-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cafe-400 focus:bg-white transition-all text-cafe-900 placeholder-cafe-900/40">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="password" class="block text-sm font-medium text-cafe-800 mb-1.5">Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i data-lucide="lock" class="w-4 h-4 text-cafe-400"></i>
+                        </div>
+                        <input type="password" id="password" required placeholder="••••••••" 
+                            class="w-full pl-11 pr-12 py-3 bg-white/50 border border-cafe-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cafe-400 focus:bg-white transition-all text-cafe-900 placeholder-cafe-900/40">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="confirm_password" class="block text-sm font-medium text-cafe-800 mb-1.5">Confirm</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i data-lucide="shield-check" class="w-4 h-4 text-cafe-400"></i>
+                        </div>
+                        <input type="password" id="confirm_password" required placeholder="••••••••" 
+                            class="w-full pl-11 pr-12 py-3 bg-white/50 border border-cafe-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cafe-400 focus:bg-white transition-all text-cafe-900 placeholder-cafe-900/40">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-end pt-1">
+                <button type="button" id="togglePassword" class="text-sm font-medium text-cafe-400 hover:text-cafe-800 transition-colors flex items-center gap-1.5">
+                    <i data-lucide="eye" id="eyeIcon" class="w-4 h-4"></i> Show Passwords
+                </button>
+            </div>
+
+            <div id="errorMsg" class="hidden text-red-500 text-sm font-medium text-center bg-red-100/50 py-2 rounded-lg"></div>
+
+            <button type="submit" id="submitBtn" class="w-full bg-cafe-800 text-white py-3.5 rounded-xl font-medium tracking-wide hover:bg-cafe-900 transition-all flex justify-center items-center gap-2 group active:scale-[0.98] mt-2">
+                <span id="btnText">Create Account</span>
+                <i data-lucide="arrow-right" id="btnIcon" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+            </button>
+        </form>
+
+        <div class="mt-8 text-center text-sm text-cafe-900/60 font-medium">
+            Already have an account? 
+            <a href="login.html" class="text-cafe-800 font-semibold hover:text-cafe-400 transition-colors">Sign in</a>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        lucide.createIcons();
+        document.getElementById('signupForm').addEventListener('submit', (e) => handleAuth(e, 'signup'));
+    </script>
+</body>
+</html>

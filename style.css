@@ -1,0 +1,150 @@
+/* Base resets & utilities */
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hide scrollbar but keep functionality */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #F5F5F0; 
+}
+::-webkit-scrollbar-thumb {
+    background: #E8E4D9; 
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #A39171; 
+}
+
+/* Glassmorphism */
+.glass {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 20px 40px -5px rgba(28, 25, 23, 0.05);
+}
+
+/* Image Animations */
+.zoom-in-bg {
+    animation: slowZoom 20s ease-out forwards;
+}
+
+@keyframes slowZoom {
+    0% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Slide Up Element */
+.slide-up-elem {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: slideUpFade 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+}
+
+@keyframes slideUpFade {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Reveal on Scroll */
+.reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-on-scroll.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Image overlay hover effect for Menu */
+.menu-img-wrapper {
+    overflow: hidden;
+    position: relative;
+    /* Fixed aspect ratio to prevent layout shifts */
+    aspect-ratio: 4 / 3;
+    background: linear-gradient(135deg, #E8E4D9 25%, #F5F5F0 50%, #E8E4D9 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.menu-img-wrapper img {
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.menu-img-wrapper img.loaded {
+    opacity: 1;
+}
+
+/* Stop shimmer once image has loaded */
+.menu-img-wrapper.img-ready {
+    animation: none;
+    background: #E8E4D9;
+}
+
+.glass-card:hover .menu-img-wrapper img {
+    transform: scale(1.05);
+}
+
+/* Loader Animation */
+.loader-text {
+    background: linear-gradient(90deg, #1C1917, #A39171, #1C1917);
+    background-size: 200% auto;
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: gradientShine 2s linear infinite;
+}
+
+@keyframes gradientShine {
+    to { background-position: 200% center; }
+}
+/* Login Card Animation */
+.login-card {
+    animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes fadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
