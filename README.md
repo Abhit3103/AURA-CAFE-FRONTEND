@@ -1,4 +1,4 @@
-# ☕ Cafe Frontend
+# ☕ AURA Cafe Frontend
 
 A responsive and user-friendly frontend for a café management system, built using HTML, CSS, and JavaScript. This project provides a clean interface for customers and administrators, integrated with a FastAPI backend.
 
