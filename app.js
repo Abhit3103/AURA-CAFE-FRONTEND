@@ -108,7 +108,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Render Menu
 async function initMenu() {
     try {
-        const res = await fetch(`${API}/menu/`);
+        const url = `${API}/menu`;
+        console.log("API Call:", url);
+        const res = await fetch(url);
         if (!res.ok) throw new Error("Fallback to mock data");
         const data = await res.json();
         if (!Array.isArray(data) || data.length === 0) throw new Error("Empty menu, using fallback");
@@ -336,7 +338,9 @@ async function processCheckout() {
         const headers = { "Content-Type": "application/json" };
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        const res = await fetch(`${API}/orders`, {
+        const url = `${API}/orders`;
+        console.log("API Call:", url);
+        const res = await fetch(url, {
             method: "POST",
             headers: headers,
             body: JSON.stringify(payload)
@@ -407,7 +411,9 @@ function toggleAdmin() {
 //              Admin Dashboard Logic
 async function updateAdminDashboard() {
     try {
-        const res = await fetch(`${API}/orders`);
+        const url = `${API}/orders`;
+        console.log("API Call:", url);
+        const res = await fetch(url);
         orders = await res.json();
         console.log("Orders:", orders);
     } catch (err) {
@@ -483,7 +489,9 @@ async function handleAdminLogin(event) {
     errorMsg.classList.add('hidden');
 
     try {
-        const res = await fetch(`${API}/admin/login`, {
+        const url = `${API}/admin/login`;
+        console.log("API Call:", url);
+        const res = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })

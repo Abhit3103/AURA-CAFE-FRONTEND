@@ -72,7 +72,9 @@ async function handleAuth(event, type) {
 
     try {
         const endpoint = type === 'login' ? '/login' : '/signup';
-        const response = await fetch(`${API}${endpoint}`, {
+        const url = `${API}${endpoint}`;
+        console.log("API Call:", url);
+        const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
