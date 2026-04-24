@@ -1,4 +1,4 @@
-const API = "https://aura-cafe-full-stack-webapp-production.up.railway.app/api";
+const API = "https://aura-cafe-full-stack-webapp-production.up.railway.app";
 
 
 // App State
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Render Menu
 async function initMenu() {
     try {
-        const url = `${API}/menu`;
+        const url = `${API}/menu/`;
         console.log("API Call:", url);
         const res = await fetch(url);
         if (!res.ok) throw new Error("Fallback to mock data");

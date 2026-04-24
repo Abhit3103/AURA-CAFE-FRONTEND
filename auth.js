@@ -1,4 +1,4 @@
-const API = "https://aura-cafe-full-stack-webapp-production.up.railway.app/api";
+const API = "https://aura-cafe-full-stack-webapp-production.up.railway.app";
 
 // Handle password visibility toggle
 const togglePasswordBtn = document.getElementById('togglePassword');
