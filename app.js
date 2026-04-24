@@ -1,4 +1,5 @@
-const API = "https://aura-cafe-full-stack-webapp-production.up.railway.app";
+const API = "https://aura-cafe-full-stack-webapp-production.up.railway.app/api";
+
 
 // App State
 let menuItems = [];
