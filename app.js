@@ -1,4 +1,4 @@
-const API = "https://aura-cafe-full-stack-webapp-production.up.railway.app";
+const API = 'https://aura-cafe-full-stack-webapp-production.up.railway.app'
 
 
 // App State
@@ -108,15 +108,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Render Menu
 async function initMenu() {
     try {
-        const url = `${API}/menu/`;
+        const url = `${API}/menu`;
         console.log("API Call:", url);
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("Fallback to mock data");
+        const res = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
         const data = await res.json();
         if (!Array.isArray(data) || data.length === 0) throw new Error("Empty menu, using fallback");
         menuItems = data;
     } catch(err) {
-        console.warn("Using fallback Indian Cafe menu:", err);
+        console.error("Live fetch failed (Possible CORS or Server Error):", err);
+        console.warn("Using fallback Indian Cafe menu");
         menuItems = [
             {
                 id: 1,
